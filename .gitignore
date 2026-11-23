@@ -7,3 +7,4 @@ publish/
 installer/Output/
 tests/TestData/demo/
 CLAUDE.md
+.DS_Store
