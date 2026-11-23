@@ -1,0 +1,9 @@
+bin/
+obj/
+*.user
+.vs/
+TestResults/
+publish/
+installer/Output/
+tests/TestData/demo/
+CLAUDE.md

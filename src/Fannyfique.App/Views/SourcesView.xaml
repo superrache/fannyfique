@@ -1,0 +1,112 @@
+<UserControl x:Class="Fannyfique.App.Views.SourcesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:Fannyfique.App.Converters">
+    <UserControl.Resources>
+        <c:VisibleIfConverter x:Key="VisibleIf"/>
+    </UserControl.Resources>
+    <Grid>
+        <!-- État vide accueillant -->
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="460"
+                    Visibility="{Binding IsEmpty, Converter={StaticResource VisibleIf}}">
+            <Border Width="88" Height="88" CornerRadius="44" Background="{DynamicResource AccentSoft}" HorizontalAlignment="Center">
+                <TextBlock Style="{StaticResource Icon}" Text="&#xE8B7;" FontSize="38" Foreground="{DynamicResource Accent}" HorizontalAlignment="Center"/>
+            </Border>
+            <TextBlock Text="Ajoute tes dossiers de photos" Style="{StaticResource H2}" HorizontalAlignment="Center" Margin="0,20,0,8"/>
+            <TextBlock Style="{StaticResource Muted}" TextWrapping="Wrap" TextAlignment="Center"
+                       Text="Ajoute tes cartes SD, ton PC, tes disques externes et ton NAS, puis lance un scan. Fannyfique te dira quels RAW sont en double et quelles cartes tu peux vider, sans jamais toucher à tes fichiers."/>
+            <Button Style="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,24,0,8" Command="{Binding AddFoldersCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource Icon}" Text="&#xE710;" Foreground="{DynamicResource OnAccent}"/>
+                    <TextBlock Text="Ajouter un dossier" Margin="8,0,0,0"/>
+                </StackPanel>
+            </Button>
+            <TextBlock Text="ou glisse-dépose un dossier sur la fenêtre" Style="{StaticResource Caption}" HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <DockPanel Visibility="{Binding IsEmpty, Converter={StaticResource VisibleIf}, ConverterParameter=invert}">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,16">
+                <Button Command="{Binding AddFoldersCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Icon}" Text="&#xE710;"/>
+                        <TextBlock Text="Ajouter un dossier" Margin="8,0,0,0"/>
+                    </StackPanel>
+                </Button>
+                <TextBlock Text="ou glisse-dépose des dossiers ici" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="12,0,0,0"/>
+            </StackPanel>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Items}" Margin="0,0,0,16">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource AnimatedCard}" Width="352" Margin="0,0,16,16" Padding="0">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="4"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Border Style="{StaticResource TypeFill}" Tag="{Binding Type}" CornerRadius="12,12,0,0"/>
+                                    <StackPanel Grid.Row="1" Margin="16,14,16,16">
+                                        <DockPanel>
+                                            <Border DockPanel.Dock="Left" Width="40" Height="40" CornerRadius="10" Background="{DynamicResource SurfaceAlt}">
+                                                <TextBlock Style="{StaticResource TypeIcon}" Tag="{Binding Type}" FontSize="20" HorizontalAlignment="Center"/>
+                                            </Border>
+                                            <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE74D;"
+                                                    Command="{Binding RemoveCommand}" ToolTip="Retirer la source (aucun fichier n'est supprimé)"/>
+                                            <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE838;"
+                                                    Command="{Binding OpenCommand}" ToolTip="Ouvrir dans l'Explorateur"/>
+                                            <TextBox Style="{StaticResource InlineEdit}" Text="{Binding Name, UpdateSourceTrigger=LostFocus}"
+                                                     Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                        </DockPanel>
+                                        <TextBlock Text="{Binding Path}" ToolTip="{Binding Path}" Style="{StaticResource Caption}" Margin="0,8,0,12"/>
+
+                                        <ListBox Style="{StaticResource Chips}" ItemsSource="{Binding TypeOptions}"
+                                                 SelectedValuePath="Type" SelectedValue="{Binding Type}">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Style="{StaticResource TypeIcon}" Tag="{Binding Type}" FontSize="12"/>
+                                                        <TextBlock Text="{Binding Label}" FontSize="12" Margin="6,0,0,0"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+
+                                        <TextBlock Text="{Binding StatsText}" FontWeight="SemiBold" Margin="0,8,0,2"/>
+                                        <TextBlock Text="{Binding LastScanText}" Style="{StaticResource Caption}"/>
+
+                                        <CheckBox Content="Fichiers renommés : ignorer les noms" IsChecked="{Binding IgnoreFileNames}" Margin="0,12,0,0"
+                                                  ToolTip="Pour un dossier issu d'une récupération de carte (recup_dir.1, recup_dir.2…) : les RAW sont reconnus par leur date de prise de vue et leur boîtier, sans tenir compte du nom."/>
+
+                                        <DockPanel Margin="0,14,0,0">
+                                            <CheckBox DockPanel.Dock="Right" Content="Active" IsChecked="{Binding Enabled}"
+                                                      ToolTip="Une source désactivée est ignorée par le scan et les résultats"/>
+                                            <Ellipse Width="8" Height="8" VerticalAlignment="Center">
+                                                <Ellipse.Style>
+                                                    <Style TargetType="Ellipse">
+                                                        <Setter Property="Fill" Value="{DynamicResource Success}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsOnline}" Value="False">
+                                                                <Setter Property="Fill" Value="{DynamicResource TextMuted}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Ellipse.Style>
+                                            </Ellipse>
+                                            <TextBlock Text="{Binding StateText}" Style="{StaticResource Caption}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                        </DockPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </DockPanel>
+    </Grid>
+</UserControl>
